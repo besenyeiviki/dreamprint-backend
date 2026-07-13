@@ -1,0 +1,9 @@
+{
+  "name": "dreamprint-backend",
+  "version": "1.0.0",
+  "description": "DreamPrint backend - Stripe + Printify integráció",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^16.0.0"
+  }
+}
