@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egyedi póló — DreamPrint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F1EC; --ink:#17181C; --cobalt:#2451FF; --coral:#FF5A36;
+    --muted:#8A8880; --line:#D8D6CC; --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; line-height:1.6;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; font-weight:700; margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+
+  header{padding:18px 0; background:var(--muted);}
+  header .wrap{display:flex; align-items:center; justify-content:space-between;}
+  .logo{font-family:'Space Grotesk'; font-weight:700; font-size:19px; color:var(--paper); background:none; border:none; cursor:pointer;}
+  .back-link{color:var(--paper); text-decoration:none; font-size:14px; font-family:'JetBrains Mono';}
+
+  main{padding:44px 0 80px;}
+  .layout{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+
+  .stage{position:sticky; top:24px;}
+  .stage-box{position:relative; width:100%; max-width:380px; height:420px; margin:0 auto; background:var(--card); border-radius:12px; border:1px solid var(--line); overflow:visible;}
+  #canvas{position:relative; width:100%; height:100%; touch-action:none;}
+  #shape-tshirt{position:absolute; top:30px; left:50%; transform:translateX(-50%);}
+  #clipwrap{position:absolute; top:0; left:0; width:100%; height:100%; clip-path: inset(20% 27% 10% 27% round 6px);}
+  #preview-img{position:absolute; display:none; cursor:grab; object-fit:cover;}
+
+  h1.title{font-size:30px; margin-bottom:6px;}
+  .price{font-family:'JetBrains Mono'; font-size:20px; color:var(--coral); margin-bottom:20px;}
+
+  .field{margin-bottom:20px;}
+  .field label{font-size:12px; font-family:'JetBrains Mono'; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; display:block; margin-bottom:8px;}
+  input[type=file]{width:100%; font-size:13px;}
+  input[type=range]{width:100%;}
+  .swatch-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .swatch{width:30px; height:30px; border-radius:50%; border:1px solid var(--line); cursor:pointer;}
+  .swatch.active{border:2px solid var(--cobalt); box-shadow:0 0 0 2px var(--paper) inset;}
+  .size-row{display:flex; gap:8px;}
+  .size-row button{flex:1; padding:10px 0; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-family:'JetBrains Mono'; font-size:13px;}
+  .size-row button.active{border-color:var(--cobalt); color:var(--cobalt); font-weight:700;}
+  .divider{border-top:1px solid var(--line); padding-top:20px;}
+
+  .btn{width:100%; font-family:'JetBrains Mono'; font-size:14px; padding:16px 0; border-radius:4px; border:1px solid var(--ink); background:var(--ink); color:var(--paper); cursor:pointer; text-transform:uppercase; letter-spacing:.03em;}
+  .btn:hover{background:var(--cobalt); border-color:var(--cobalt);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .status-msg{margin-top:12px; font-size:13px; color:var(--muted); text-align:center; min-height:18px;}
+  .status-msg.error{color:var(--coral);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <button class="logo" onclick="window.location.href='index.html'">dreamprint</button>
+    <a class="back-link" href="index.html">← vissza a termékekhez</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap layout">
+
+    <div class="stage">
+      <div class="stage-box">
+        <div id="canvas">
+          <svg id="shape-tshirt" viewBox="0 0 200 220" width="260" height="290">
+            <path id="fill-tshirt" d="M75 20 Q100 35 125 20 L158 40 Q168 48 160 62 L142 78 L142 210 Q100 218 58 210 L58 78 L40 62 Q32 48 42 40 Z" fill="#fff" stroke="#17181C" stroke-width="1.5"/>
+          </svg>
+          <div id="clipwrap">
+            <img id="preview-img" draggable="false" />
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center; font-size:13px; color:var(--muted); margin-top:14px;">húzd a képet a pólón, csúszkával méretezd</p>
+    </div>
+
+    <div>
+      <h1 class="title">Egyedi póló</h1>
+      <div class="price mono" id="price-display">8 990 Ft</div>
+
+      <div class="field">
+        <label>Saját kép</label>
+        <input type="file" id="upload" accept="image/*"/>
+        <label style="margin-top:12px;">Kép mérete</label>
+        <input type="range" id="scale" min="30" max="220" value="90"/>
+      </div>
+
+      <div class="field">
+        <label>Szín</label>
+        <div class="swatch-row" id="swatches"></div>
+      </div>
+
+      <div class="field divider">
+        <label>Méret</label>
+        <div class="size-row" id="size-buttons"></div>
+      </div>
+
+      <div class="field divider">
+        <button class="btn" id="order-btn">Megrendelés</button>
+        <div class="status-msg" id="status-msg"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ----- BEÁLLÍTÁSOK -----
+const BACKEND_URL = 'https://dreamprint-backend.vercel.app';
+const BLUEPRINT_ID = 6;
+const PRINT_PROVIDER_ID = 26;
+const PRICE_HUF = 8990;
+
+// Szín -> variant ID táblázat (méretenként), a Printify terméked valós adatai alapján
+const VARIANTS = {
+  'Fehér':        { hex:'#ffffff', S:12102, M:12101, L:12100, XL:12103 },
+  'Fekete':       { hex:'#17181C', S:12126, M:12125, L:12124, XL:12127 },
+  'Piros':        { hex:'#C62A32', S:12024, M:12023, L:12022, XL:12025 },
+  'Sport Grey':   { hex:'#CACACA', S:12072, M:12071, L:12070, XL:12073 },
+  'Ash':          { hex:'#F6F6F6', S:11850, M:11849, L:11848, XL:11851 },
+  'Charcoal':     { hex:'#585559', S:11874, M:11873, L:11872, XL:11875 },
+  'Heliconia':    { hex:'#DF5086', S:11946, M:11945, L:11944, XL:11947 },
+  'Irish Green':  { hex:'#279436', S:11952, M:11951, L:11950, XL:11953 },
+  'Light Blue':   { hex:'#d6e6f7', S:11958, M:11957, L:11956, XL:11959 },
+  'Light Pink':   { hex:'#FEE0EB', S:11964, M:11963, L:11962, XL:11965 },
+  'Sand':         { hex:'#DCD2BE', S:12054, M:12053, L:12052, XL:12055 },
+  'Cardinal Red': { hex:'#9f1931', S:12132, M:12131, L:12130, XL:12133 },
+};
+
+let currentColor = 'Fehér';
+let currentSize = 'M';
+let uploadedFile = null;
+let ix = 0.5, iy = 0.5, baseSize = 130;
+
+const img = document.getElementById('preview-img');
+const canvas = document.getElementById('canvas');
+const upload = document.getElementById('upload');
+const scale = document.getElementById('scale');
+const fillEl = document.getElementById('fill-tshirt');
+const swatches = document.getElementById('swatches');
+const sizeButtons = document.getElementById('size-buttons');
+const statusMsg = document.getElementById('status-msg');
+const orderBtn = document.getElementById('order-btn');
+
+let dragging = false, offX = 0, offY = 0, pxX = 0, pxY = 0;
+
+function buildSwatches(){
+  swatches.innerHTML = '';
+  Object.entries(VARIANTS).forEach(([name, v]) => {
+    const b = document.createElement('button');
+    b.className = 'swatch' + (name === currentColor ? ' active' : '');
+    b.style.background = v.hex;
+    b.title = name;
+    b.addEventListener('click', () => { currentColor = name; fillEl.setAttribute('fill', v.hex); buildSwatches(); });
+    swatches.appendChild(b);
+  });
+}
+function buildSizes(){
+  sizeButtons.innerHTML = '';
+  ['S','M','L','XL'].forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s;
+    b.className = s === currentSize ? 'active' : '';
+    b.addEventListener('click', () => { currentSize = s; buildSizes(); });
+    sizeButtons.appendChild(b);
+  });
+}
+
+function applyImg(){
+  const s = scale.value/100;
+  const size = baseSize*s;
+  img.style.width = size+'px';
+  img.style.height = size+'px';
+  const rect = canvas.getBoundingClientRect();
+  pxX = ix*rect.width - size/2;
+  pxY = iy*rect.height - size/2;
+  img.style.left = pxX+'px';
+  img.style.top = pxY+'px';
+}
+
+upload.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  uploadedFile = file;
+  const reader = new FileReader();
+  reader.onload = ev=>{ img.src = ev.target.result; img.style.display='block'; ix=0.5; iy=0.5; applyImg(); };
+  reader.readAsDataURL(file);
+});
+scale.addEventListener('input', applyImg);
+
+img.addEventListener('pointerdown', e=>{
+  dragging = true; img.style.cursor='grabbing';
+  const rect = canvas.getBoundingClientRect();
+  offX = e.clientX - rect.left - pxX;
+  offY = e.clientY - rect.top - pxY;
+  img.setPointerCapture(e.pointerId);
+});
+img.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const rect = canvas.getBoundingClientRect();
+  const size = parseFloat(img.style.width);
+  pxX = e.clientX - rect.left - offX;
+  pxY = e.clientY - rect.top - offY;
+  ix = (pxX + size/2) / rect.width;
+  iy = (pxY + size/2) / rect.height;
+  img.style.left = pxX+'px';
+  img.style.top = pxY+'px';
+});
+img.addEventListener('pointerup', ()=>{ dragging=false; img.style.cursor='grab'; });
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function setStatus(text, isError){
+  statusMsg.textContent = text;
+  statusMsg.className = 'status-msg' + (isError ? ' error' : '');
+}
+
+orderBtn.addEventListener('click', async ()=>{
+  if(!uploadedFile){
+    setStatus('Előbb tölts fel egy képet.', true);
+    return;
+  }
+  orderBtn.disabled = true;
+  setStatus('Kép feltöltése...');
+
+  try {
+    const imageBase64 = await fileToBase64(uploadedFile);
+
+    const uploadRes = await fetch(`${BACKEND_URL}/api/upload-design`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64, fileName: uploadedFile.name }),
+    });
+    const uploadData = await uploadRes.json();
+    if(!uploadRes.ok) throw new Error(uploadData.error || 'Kép feltöltési hiba');
+
+    setStatus('Fizetés előkészítése...');
+
+    const variantId = VARIANTS[currentColor][currentSize];
+
+    const checkoutRes = await fetch(`${BACKEND_URL}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productName: `Egyedi póló — ${currentColor}, ${currentSize}`,
+        priceHUF: PRICE_HUF,
+        quantity: 1,
+        blueprintId: BLUEPRINT_ID,
+        printProviderId: PRINT_PROVIDER_ID,
+        variantId: variantId,
+        imageId: uploadData.imageId,
+        imageX: ix,
+        imageY: iy,
+        imageScale: scale.value/100,
+        printPosition: 'front',
+      }),
+    });
+    const checkoutData = await checkoutRes.json();
+    if(!checkoutRes.ok) throw new Error(checkoutData.error || 'Fizetés indítási hiba');
+
+    setStatus('Átirányítás a fizetéshez...');
+    window.location.href = checkoutData.checkoutUrl;
+
+  } catch (err) {
+    console.error(err);
+    setStatus('Hiba történt: ' + err.message, true);
+    orderBtn.disabled = false;
+  }
+});
+
+buildSwatches();
+buildSizes();
+window.addEventListener('resize', applyImg);
+</script>
+</body>
+</html>
